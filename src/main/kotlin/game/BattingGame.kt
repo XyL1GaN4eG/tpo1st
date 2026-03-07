@@ -1,4 +1,4 @@
-package juko.juko.game
+package juko.game
 
 interface BattingGame {
     fun bat()
