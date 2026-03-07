@@ -12,9 +12,10 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    testImplementation(kotlin("test"))
-    // Source: https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
-    testImplementation("org.junit.jupiter:junit-jupiter-api:6.0.3")
+//    testImplementation(kotlin("test"))
+    testImplementation(platform("org.junit:junit-bom:6.0.3"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 application {
@@ -24,6 +25,9 @@ application {
 
 tasks.test {
     useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
 }
 
 kotlin {
