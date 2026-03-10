@@ -16,7 +16,6 @@ class BinomialQueue<T : Comparable<T>>() : MutableCollection<T> {
 
     inner class Iterator : MutableIterator<T> {
         private val stack = ArrayDeque<BinomialNode<T>>()
-        private var lastReturned: BinomialNode<T>? = null
 
         init {
             head?.let { stack.addLast(it) } // начинаем с головы списка корней
@@ -28,10 +27,7 @@ class BinomialQueue<T : Comparable<T>>() : MutableCollection<T> {
             if (!hasNext()) throw NoSuchElementException()
 
             val node = stack.removeLast()
-            lastReturned = node
 
-            // добавляем siblings и потомков в стек
-            // сначала sibling, потом child, чтобы child обрабатывался первым
             node.sibling?.let { stack.addLast(it) }
             node.child?.let { stack.addLast(it) }
 
@@ -39,10 +35,36 @@ class BinomialQueue<T : Comparable<T>>() : MutableCollection<T> {
         }
 
         override fun remove() {
-            // реализация remove для биномиальной кучи нетривиальна
-            // и ломает структуру дерева, поэтому лучше не поддерживать
             throw UnsupportedOperationException("Remove not supported in BinomialQueue iterator")
         }
+    }
+
+    private fun binomialTreeSize(degree: Int): Int {
+        val size = 1L shl degree
+        require(size <= Int.MAX_VALUE) {
+            "Binomial tree degree $degree is too large for Int-backed size accounting"
+        }
+        return size.toInt()
+    }
+
+    private fun rebuildKeeping(keep: (T) -> Boolean): Boolean {
+        val kept = ArrayList<T>(_size)
+        var changed = false
+
+        while (true) {
+            val value = extractMin() ?: break
+            if (keep(value)) {
+                kept.add(value)
+            } else {
+                changed = true
+            }
+        }
+
+        for (value in kept) {
+            add(value)
+        }
+
+        return changed
     }
 
     // todo: мб переписать под хвостовую рекурсию?
@@ -75,6 +97,9 @@ class BinomialQueue<T : Comparable<T>>() : MutableCollection<T> {
         }
         if (prevMin != null) prevMin.sibling = minNode!!.sibling else head = minNode!!.sibling
 
+        val removedTreeSize = binomialTreeSize(minNode!!.degree)
+        _size -= removedTreeSize
+
         var child = minNode.child
         val newHeap = BinomialQueue<T>()
         var prevChild: BinomialNode<T>? = null
@@ -87,23 +112,24 @@ class BinomialQueue<T : Comparable<T>>() : MutableCollection<T> {
             child = nextChild
         }
         newHeap.head = prevChild
+        newHeap._size = removedTreeSize - 1
 
         this.union(newHeap)
-        _size--
         return minNode.key
     }
 
     fun union(other: BinomialQueue<T>) {
-        if (other.head == null) return
-        if (this.head == null) {
-            this.head = other.head
-            return
-        }
+        if (other === this || other.head == null) return
+
         head = mergeRootLists(other.head)
         _size += other._size
+        other.head = null
+        other._size = 0
+
+        val mergedHead = head ?: return
 
         var prev: BinomialNode<T>? = null
-        var curr = head!!
+        var curr = mergedHead
         var next = curr.sibling
 
         while (next != null) {
@@ -178,43 +204,68 @@ class BinomialQueue<T : Comparable<T>>() : MutableCollection<T> {
         newHeap.head = node
         newHeap._size = 1
         this.union(newHeap)
-        _size++
         return true
     }
 
     override fun remove(element: T): Boolean {
-        TODO("Not yet implemented")
+        var removed = false
+        return rebuildKeeping { value ->
+            if (!removed && value == element) {
+                removed = true
+                false
+            } else {
+                true
+            }
+        }
     }
 
     override fun addAll(elements: Collection<T>): Boolean {
-        try {
-            for (element in elements) add(element)
-        } catch (_: Exception) {
-            return false
+        val snapshot = elements.toList()
+        if (snapshot.isEmpty()) return false
+
+        for (element in snapshot) {
+            add(element)
         }
         return true
     }
 
     override fun removeAll(elements: Collection<T>): Boolean {
-        TODO("Not yet implemented")
+        val toRemove = elements.toHashSet()
+        if (toRemove.isEmpty() || isEmpty()) return false
+
+        return rebuildKeeping { value -> value !in toRemove }
     }
 
     override fun retainAll(elements: Collection<T>): Boolean {
-        TODO("Not yet implemented")
+        val toKeep = elements.toHashSet()
+        if (isEmpty()) return false
+
+        return rebuildKeeping { value -> value in toKeep }
     }
 
     override fun clear() {
-        TODO()
+        head = null
+        _size = 0
     }
 
-    override fun isEmpty() = head == null
+    override fun isEmpty() = _size == 0
 
     override fun contains(element: T): Boolean {
-        TODO("Not yet implemented")
+        val stack = ArrayDeque<BinomialNode<T>>()
+        head?.let { stack.addLast(it) } ?: return false
+
+        while (stack.isNotEmpty()) {
+            val node = stack.removeLast()
+            if (node.key == element) return true
+            node.sibling?.let { stack.addLast(it) }
+            node.child?.let { stack.addLast(it) }
+        }
+
+        return false
     }
 
     override fun containsAll(elements: Collection<T>): Boolean {
-        TODO("Not yet implemented")
+        return elements.all { contains(it) }
     }
 
 }
