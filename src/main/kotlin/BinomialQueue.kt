@@ -1,8 +1,24 @@
 package juko
 
 class BinomialQueue<T : Comparable<T>>() : MutableCollection<T> {
+    enum class TracePoint {
+        ADD_START,
+        UNION_START,
+        UNION_ADOPT_OTHER_HEAD,
+        UNION_MERGE_ROOT_LISTS,
+        UNION_ADVANCE,
+        UNION_LINK_NEXT_UNDER_CURRENT,
+        UNION_LINK_CURRENT_UNDER_NEXT,
+        EXTRACT_MIN_START,
+        EXTRACT_MIN_FOUND_NEW_MIN,
+        EXTRACT_MIN_REMOVE_ROOT,
+        EXTRACT_MIN_REVERSE_CHILD,
+        EXTRACT_MIN_UNION_CHILDREN,
+    }
+
     private var head: BinomialNode<T>? = null
     private var _size: Int = 0
+    private var traceSink: ((TracePoint) -> Unit)? = null
     override val size: Int
         get() = _size
 
@@ -37,6 +53,19 @@ class BinomialQueue<T : Comparable<T>>() : MutableCollection<T> {
         override fun remove() {
             throw UnsupportedOperationException("Remove not supported in BinomialQueue iterator")
         }
+    }
+
+    private fun trace(point: TracePoint) {
+        traceSink?.invoke(point)
+    }
+
+    fun traceTo(destination: MutableCollection<TracePoint>): BinomialQueue<T> {
+        traceSink = { point -> destination.add(point) }
+        return this
+    }
+
+    fun clearTrace() {
+        traceSink = null
     }
 
     private fun binomialTreeSize(degree: Int): Int {
@@ -81,6 +110,7 @@ class BinomialQueue<T : Comparable<T>>() : MutableCollection<T> {
 
     fun extractMin(): T? {
         if (head == null) return null
+        trace(TracePoint.EXTRACT_MIN_START)
 
         var prevMin: BinomialNode<T>? = null
         var minNode = head
@@ -91,11 +121,13 @@ class BinomialQueue<T : Comparable<T>>() : MutableCollection<T> {
             if (curr.key < minNode!!.key) {
                 minNode = curr
                 prevMin = prev
+                trace(TracePoint.EXTRACT_MIN_FOUND_NEW_MIN)
             }
             prev = curr
             curr = curr.sibling
         }
         if (prevMin != null) prevMin.sibling = minNode!!.sibling else head = minNode!!.sibling
+        trace(TracePoint.EXTRACT_MIN_REMOVE_ROOT)
 
         val removedTreeSize = binomialTreeSize(minNode!!.degree)
         _size -= removedTreeSize
@@ -110,18 +142,29 @@ class BinomialQueue<T : Comparable<T>>() : MutableCollection<T> {
             child.parent = null
             prevChild = child
             child = nextChild
+            trace(TracePoint.EXTRACT_MIN_REVERSE_CHILD)
         }
         newHeap.head = prevChild
         newHeap._size = removedTreeSize - 1
 
+        trace(TracePoint.EXTRACT_MIN_UNION_CHILDREN)
         this.union(newHeap)
         return minNode.key
     }
 
     fun union(other: BinomialQueue<T>) {
         if (other === this || other.head == null) return
+        trace(TracePoint.UNION_START)
 
+        val hadCurrentRoots = head != null
         head = mergeRootLists(other.head)
+        trace(
+            if (hadCurrentRoots) {
+                TracePoint.UNION_MERGE_ROOT_LISTS
+            } else {
+                TracePoint.UNION_ADOPT_OTHER_HEAD
+            },
+        )
         _size += other._size
         other.head = null
         other._size = 0
@@ -136,13 +179,16 @@ class BinomialQueue<T : Comparable<T>>() : MutableCollection<T> {
             if (curr.degree != next.degree ||
                 (next.sibling != null && next.sibling!!.degree == curr.degree)
             ) {
+                trace(TracePoint.UNION_ADVANCE)
                 prev = curr
                 curr = next
             } else {
                 if (curr.key <= next.key) {
+                    trace(TracePoint.UNION_LINK_NEXT_UNDER_CURRENT)
                     curr.sibling = next.sibling
                     linkTrees(next, curr)
                 } else {
+                    trace(TracePoint.UNION_LINK_CURRENT_UNDER_NEXT)
                     if (prev != null) prev.sibling = next else head = next
                     linkTrees(curr, next)
                     curr = next
@@ -199,6 +245,7 @@ class BinomialQueue<T : Comparable<T>>() : MutableCollection<T> {
     override fun iterator(): MutableIterator<T> = Iterator()
 
     override fun add(element: T): Boolean {
+        trace(TracePoint.ADD_START)
         val node = BinomialNode(element)
         val newHeap = BinomialQueue<T>()
         newHeap.head = node

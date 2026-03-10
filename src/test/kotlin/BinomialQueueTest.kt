@@ -30,6 +30,70 @@ class BinomialQueueTest {
             Arguments.of(listOf(5, 5, 5), 5, true, listOf(5, 5)),
             Arguments.of(listOf(1, 2, 3), 10, false, listOf(1, 2, 3)),
         )
+
+        @JvmStatic
+        fun addTraceCases() = listOf(
+            Arguments.of(
+                listOf(1),
+                2,
+                listOf(
+                    BinomialQueue.TracePoint.ADD_START,
+                    BinomialQueue.TracePoint.UNION_START,
+                    BinomialQueue.TracePoint.UNION_MERGE_ROOT_LISTS,
+                    BinomialQueue.TracePoint.UNION_LINK_NEXT_UNDER_CURRENT,
+                ),
+            ),
+            Arguments.of(
+                listOf(2),
+                1,
+                listOf(
+                    BinomialQueue.TracePoint.ADD_START,
+                    BinomialQueue.TracePoint.UNION_START,
+                    BinomialQueue.TracePoint.UNION_MERGE_ROOT_LISTS,
+                    BinomialQueue.TracePoint.UNION_LINK_CURRENT_UNDER_NEXT,
+                ),
+            ),
+            Arguments.of(
+                listOf(1, 2, 3, 4),
+                5,
+                listOf(
+                    BinomialQueue.TracePoint.ADD_START,
+                    BinomialQueue.TracePoint.UNION_START,
+                    BinomialQueue.TracePoint.UNION_MERGE_ROOT_LISTS,
+                    BinomialQueue.TracePoint.UNION_ADVANCE,
+                ),
+            ),
+        )
+
+        @JvmStatic
+        fun extractTraceCases() = listOf(
+            Arguments.of(
+                listOf(1, 2),
+                1,
+                listOf(
+                    BinomialQueue.TracePoint.EXTRACT_MIN_START,
+                    BinomialQueue.TracePoint.EXTRACT_MIN_REMOVE_ROOT,
+                    BinomialQueue.TracePoint.EXTRACT_MIN_REVERSE_CHILD,
+                    BinomialQueue.TracePoint.EXTRACT_MIN_UNION_CHILDREN,
+                    BinomialQueue.TracePoint.UNION_START,
+                    BinomialQueue.TracePoint.UNION_ADOPT_OTHER_HEAD,
+                ),
+            ),
+            Arguments.of(
+                listOf(1, 2, 3),
+                1,
+                listOf(
+                    BinomialQueue.TracePoint.EXTRACT_MIN_START,
+                    BinomialQueue.TracePoint.EXTRACT_MIN_FOUND_NEW_MIN,
+                    BinomialQueue.TracePoint.EXTRACT_MIN_REMOVE_ROOT,
+                    BinomialQueue.TracePoint.EXTRACT_MIN_REVERSE_CHILD,
+                    BinomialQueue.TracePoint.EXTRACT_MIN_UNION_CHILDREN,
+                    BinomialQueue.TracePoint.UNION_START,
+                    BinomialQueue.TracePoint.UNION_MERGE_ROOT_LISTS,
+                    BinomialQueue.TracePoint.UNION_LINK_CURRENT_UNDER_NEXT,
+                ),
+            ),
+        )
     }
 
     private fun queueOf(elements: List<Int>): BinomialQueue<Int> =
@@ -90,6 +154,41 @@ class BinomialQueueTest {
             { assertEquals(expectedRemoved, removed) },
             { assertEquals(expectedRemaining.size, remainingSize) },
             { assertEquals(expectedRemaining, remaining) },
+        )
+    }
+
+    @ParameterizedTest(name = "trace add {1} into {0}")
+    @MethodSource("addTraceCases")
+    fun tracesCharacteristicPointsForAdd(
+        initialElements: List<Int>,
+        elementToAdd: Int,
+        expectedTrace: List<BinomialQueue.TracePoint>,
+    ) {
+        val queue = queueOf(initialElements)
+        val trace = mutableListOf<BinomialQueue.TracePoint>()
+        queue.traceTo(trace)
+
+        queue.add(elementToAdd)
+
+        assertEquals(expectedTrace, trace)
+    }
+
+    @ParameterizedTest(name = "trace extractMin from {0}")
+    @MethodSource("extractTraceCases")
+    fun tracesCharacteristicPointsForExtractMin(
+        initialElements: List<Int>,
+        expectedMin: Int,
+        expectedTrace: List<BinomialQueue.TracePoint>,
+    ) {
+        val queue = queueOf(initialElements)
+        val trace = mutableListOf<BinomialQueue.TracePoint>()
+        queue.traceTo(trace)
+
+        val extracted = queue.extractMin()
+
+        assertAll(
+            { assertEquals(expectedMin, extracted) },
+            { assertEquals(expectedTrace, trace) },
         )
     }
 
