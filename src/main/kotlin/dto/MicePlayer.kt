@@ -1,4 +1,4 @@
-package juko.dto.creatures
+package juko.dto
 
 class MicePlayer(
     name: String,

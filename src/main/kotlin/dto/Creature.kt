@@ -1,4 +1,4 @@
-package juko.dto.creatures
+package juko.dto
 
 abstract class Creature(
     val name: String,

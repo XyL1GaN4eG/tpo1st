@@ -1,6 +1,6 @@
 package juko.game
 
-import juko.dto.creatures.Playable
+import juko.dto.Playable
 
 abstract class Game<T : Playable> {
     abstract val players: MutableCollection<T>

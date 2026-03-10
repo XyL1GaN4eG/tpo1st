@@ -1,8 +1,8 @@
 package juko.game
 
 import juko.BinomialQueue
-import juko.dto.creatures.Human
-import juko.dto.creatures.Mice
+import juko.dto.Human
+import juko.dto.Mice
 
 class BrockianUltraCricket(
     override val players: BinomialQueue<Mice>,
