@@ -4,8 +4,10 @@ import juko.dto.Mice
 import juko.dto.MicePlayer
 import juko.game.BrockianUltraCricket
 import juko.game.Hittable
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -34,7 +36,9 @@ class DomainTest {
     fun creatureCanManifestPhysicallyWithoutLosingIdentity() {
         val creature = object : Creature("Deep Thought") {}
 
-        assertDoesNotThrow { creature.manifestPhysically() }
+        assertFalse(creature.isPhysicallyManifested)
+        creature.manifestPhysically()
+        assertTrue(creature.isPhysicallyManifested)
         assertEquals("Deep Thought", creature.name)
     }
 
@@ -42,20 +46,27 @@ class DomainTest {
     fun humanCanReceiveUnexpectedHitAndRunAwayFromDanger() {
         val human = Human("Arthur Dent")
 
-        assertDoesNotThrow {
-            human.receiveUnexpectedHit()
-            human.runAwayFromDanger()
-        }
+        human.receiveUnexpectedHit()
+        assertTrue(human.isPhysicallyManifested)
+        assertEquals(1, human.unexpectedHitCount)
+        assertFalse(human.isRunningAway)
+
+        human.runAwayFromDanger()
+        assertTrue(human.isRunningAway)
     }
 
     @Test
     fun miceCanHandleExistentialRoutine() {
         val mice = Mice("Frankie", 42)
 
-        assertDoesNotThrow {
-            mice.argueAboutMeaningOfLife()
-            mice.resolveAllQuestionsOnceAndForAll()
-        }
+        mice.argueAboutMeaningOfLife()
+        assertTrue(mice.isPhysicallyManifested)
+        assertEquals(1, mice.meaningOfLifeArguments)
+        assertFalse(mice.hasResolvedAllQuestions)
+
+        mice.resolveAllQuestionsOnceAndForAll()
+        assertEquals(0, mice.meaningOfLifeArguments)
+        assertTrue(mice.hasResolvedAllQuestions)
     }
 
     @Test
@@ -65,6 +76,8 @@ class DomainTest {
 
         mice.playBrockianUltraCricket(target)
 
+        assertEquals(8, mice.score)
+        assertEquals(1, mice.successfulHits)
         assertEquals(1, target.hitCount)
     }
 
@@ -85,22 +98,40 @@ class DomainTest {
     fun micePlayerCanEnterMatch() {
         val player = MicePlayer("Trillian", 100)
 
-        assertDoesNotThrow { player.enterMatch() }
+        assertFalse(player.isInMatch)
+        player.enterMatch()
+        assertTrue(player.isPhysicallyManifested)
+        assertEquals(1, player.enteredMatches)
+        assertTrue(player.isInMatch)
+
+        player.leaveMatch()
+        assertFalse(player.isInMatch)
     }
 
     @Test
     fun brockianUltraCricketCanHandleBasicLifecycle() {
-        val player = Mice("Slartibartfast", 1)
+        val player = MicePlayer("Slartibartfast", 1)
         val game = BrockianUltraCricket()
         game.addPlayer(player)
 
-        assertDoesNotThrow {
-            game.start()
-            game.result()
-            game.resultByPlayer(player)
-            game.runAway()
-            game.finish()
-        }
+        game.start()
+        assertTrue(game.isStarted)
+        assertTrue(player.isInMatch)
+
+        game.result()
+        assertNotNull(game.lastResult)
+        assertEquals(player, game.lastResult!!.leader)
+
+        game.resultByPlayer(player)
+        assertNotNull(game.lastPlayerResult)
+        assertEquals(player, game.lastPlayerResult!!.player)
+        assertTrue(game.lastPlayerResult!!.isLeader)
+
+        game.runAway()
+        game.finish()
+        assertFalse(game.isStarted)
+        assertTrue(game.isFinished)
+        assertFalse(player.isInMatch)
     }
 
     @Test
@@ -110,10 +141,13 @@ class DomainTest {
         val target = Human("Arthur Dent")
 
         assertTrue(game.addPlayer(player))
+        game.start()
 
         game.bat(player, target)
 
         assertEquals(4, player.score)
+        assertEquals(1, target.unexpectedHitCount)
+        assertEquals(1, game.roundsPlayed)
     }
 
     @Test
@@ -123,21 +157,28 @@ class DomainTest {
         val target = RecordingTarget()
 
         game.addPlayer(player)
+        game.start()
         game.hitWithoutVisibleReason(player, target)
 
         assertEquals(10, player.score)
         assertEquals(1, target.hitCount)
+        assertEquals(0, game.roundsPlayed)
     }
 
     @Test
-    fun brockianUltraCricketChoosesOneOfAvailableHumans() {
+    fun brockianUltraCricketChoosesBestAvailableHumanTarget() {
         val game = BrockianUltraCricket()
         val first = Human("Ford Prefect")
         val second = Human("Zaphod Beeblebrox")
+        val third = Human("Arthur Dent")
 
-        val chosen = game.chooseTarget(listOf(first, second))
+        first.receiveUnexpectedHit()
+        first.runAwayFromDanger()
+        second.receiveUnexpectedHit()
 
-        assertTrue(chosen == first || chosen == second)
+        val chosen = game.chooseTarget(listOf(first, second, third))
+
+        assertSame(third, chosen)
     }
 
     @Test
@@ -146,6 +187,7 @@ class DomainTest {
         val player = Mice("Marvin", 0)
 
         assertTrue(game.addPlayer(player))
+        assertFalse(game.addPlayer(player))
         assertTrue(player in game.players)
         assertTrue(game.removePlayer(player))
         assertTrue(player !in game.players)
@@ -158,8 +200,19 @@ class DomainTest {
         val target = Human("Arthur Dent")
 
         game.addPlayer(player)
+        game.start()
 
-        assertDoesNotThrow { game.playRound(player, target) }
+        game.playRound(player, target)
         assertEquals(1, player.score)
+        assertEquals(1, target.unexpectedHitCount)
+        assertTrue(target.isRunningAway)
+        assertEquals(1, game.roundsPlayed)
+
+        game.result()
+        assertEquals(1, game.lastResult!!.roundsPlayed)
+        assertEquals(1, game.lastResult!!.escapedTargets)
+
+        game.resultByPlayer(player)
+        assertEquals(1, game.lastPlayerResult!!.successfulHits)
     }
 }
