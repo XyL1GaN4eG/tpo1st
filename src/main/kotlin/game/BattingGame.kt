@@ -1,5 +1,5 @@
 package juko.game
 
 interface BattingGame {
-    fun bat()
+    fun bat(target: Hittable)
 }

@@ -23,8 +23,23 @@ class BrockianUltraCricket(
         TODO("Not yet implemented")
     }
 
-    override fun bat() {
+    override fun bat(target: Hittable) {
         TODO("Not yet implemented")
     }
 
+    override fun chooseTarget(targets: Collection<Human>): Human {
+        TODO("Not yet implemented")
+    }
+
+    override fun runAway() {
+        TODO("Not yet implemented")
+    }
+
+    override fun hitWithoutVisibleReason(target: Hittable) {
+        TODO("Not yet implemented")
+    }
+
+    fun playRound(player: Mice, target: Human) {
+        TODO("Not yet implemented")
+    }
 }
