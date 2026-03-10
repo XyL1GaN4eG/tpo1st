@@ -1,5 +1,7 @@
 package juko.game
 
-interface Brockian {
-    fun hitWithoutVisibleReason(target: Hittable)
+import juko.dto.Playable
+
+interface Brockian<P : Playable> {
+    fun hitWithoutVisibleReason(player: P, target: Hittable)
 }

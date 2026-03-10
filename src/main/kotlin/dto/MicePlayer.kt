@@ -5,6 +5,6 @@ class MicePlayer(
     score: Int,
 ) : Mice(name, score), Playable {
     fun enterMatch() {
-        TODO("Not yet implemented")
+        // no-op stub for domain model tests
     }
 }

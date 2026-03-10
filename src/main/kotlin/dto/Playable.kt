@@ -1,5 +1,5 @@
 package juko.dto
 
 interface Playable {
-    val score: Number
+    val score: Int
 }

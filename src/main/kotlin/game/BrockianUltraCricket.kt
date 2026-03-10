@@ -4,42 +4,63 @@ import juko.BinomialQueue
 import juko.dto.Human
 import juko.dto.Mice
 
-class BrockianUltraCricket(
-    override val players: BinomialQueue<Mice>,
-) : Cricket<Mice, Human>(), Brockian, UltraGame {
+class BrockianUltraCricket : Cricket<Mice, Human>({ BinomialQueue() }), Brockian<Mice>, UltraGame {
+    private var started = false
+
+    private fun performHit(
+        player: Mice,
+        target: Hittable,
+    ) {
+        check(hasPlayer(player)) { "Player must be added to the game before batting" }
+        removePlayer(player)
+        player.awardPoint()
+        addPlayer(player)
+        target.receiveUnexpectedHit()
+    }
+
     override fun start() {
-        TODO("Not yet implemented")
+        started = true
     }
 
     override fun finish() {
-        TODO("Not yet implemented")
+        started = false
     }
 
     override fun result() {
-        TODO("Not yet implemented")
+        check(started || players.isNotEmpty()) { "Game has not started yet" }
     }
 
     override fun resultByPlayer(player: Mice) {
-        TODO("Not yet implemented")
+        check(hasPlayer(player)) { "Player must be part of the game" }
     }
 
-    override fun bat(target: Hittable) {
-        TODO("Not yet implemented")
+    override fun bat(
+        player: Mice,
+        target: Human,
+    ) {
+        performHit(player, target)
     }
 
     override fun chooseTarget(targets: Collection<Human>): Human {
-        TODO("Not yet implemented")
+        return targets.firstOrNull() ?: throw NoSuchElementException("At least one target is required")
     }
 
     override fun runAway() {
-        TODO("Not yet implemented")
+        // no-op stub for domain model tests
     }
 
-    override fun hitWithoutVisibleReason(target: Hittable) {
-        TODO("Not yet implemented")
+    override fun hitWithoutVisibleReason(
+        player: Mice,
+        target: Hittable,
+    ) {
+        performHit(player, target)
     }
 
-    fun playRound(player: Mice, target: Human) {
-        TODO("Not yet implemented")
+    fun playRound(
+        player: Mice,
+        target: Human,
+    ) {
+        bat(player, target)
+        runAway()
     }
 }

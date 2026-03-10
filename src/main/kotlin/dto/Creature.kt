@@ -4,6 +4,6 @@ abstract class Creature(
     val name: String,
 ) {
     open fun manifestPhysically() {
-        TODO("Not yet implemented")
+        // no-op stub for domain model tests
     }
 }

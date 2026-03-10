@@ -4,21 +4,26 @@ import juko.game.Hittable
 
 open class Mice(
     name: String,
-    override val score: Number,
+    override var score: Int,
 ) : Creature(name), Playable, Comparable<Mice> {
     fun argueAboutMeaningOfLife() {
-        TODO("Not yet implemented")
+        // no-op stub for domain model tests
     }
 
     fun resolveAllQuestionsOnceAndForAll() {
-        TODO("Not yet implemented")
+        // no-op stub for domain model tests
     }
 
     fun playBrockianUltraCricket(target: Hittable) {
-        TODO("Not yet implemented")
+        target.receiveUnexpectedHit()
+    }
+
+    fun awardPoint(points: Int = 1) {
+        require(points >= 0) { "Points increment must be non-negative" }
+        score += points
     }
 
     override fun compareTo(other: Mice): Int {
-        TODO("Not yet implemented")
+        return score.compareTo(other.score)
     }
 }

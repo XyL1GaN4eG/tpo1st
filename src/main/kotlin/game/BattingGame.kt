@@ -1,5 +1,7 @@
 package juko.game
 
-interface BattingGame {
-    fun bat(target: Hittable)
+import juko.dto.Playable
+
+interface BattingGame<P : Playable, T : Hittable> {
+    fun bat(player: P, target: T)
 }

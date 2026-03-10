@@ -1,4 +1,3 @@
-import juko.BinomialQueue
 import juko.dto.Creature
 import juko.dto.Human
 import juko.dto.Mice
@@ -13,7 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 
-class DomainModelTddTest {
+class DomainTest {
     private class RecordingTarget : Hittable {
         var hitCount = 0
 
@@ -92,7 +91,8 @@ class DomainModelTddTest {
     @Test
     fun brockianUltraCricketCanHandleBasicLifecycle() {
         val player = Mice("Slartibartfast", 1)
-        val game = BrockianUltraCricket(BinomialQueue())
+        val game = BrockianUltraCricket()
+        game.addPlayer(player)
 
         assertDoesNotThrow {
             game.start()
@@ -104,28 +104,34 @@ class DomainModelTddTest {
     }
 
     @Test
-    fun brockianUltraCricketBatHitsProvidedTarget() {
-        val game = BrockianUltraCricket(BinomialQueue())
-        val target = RecordingTarget()
+    fun brockianUltraCricketBatIncrementsPlayerScore() {
+        val game = BrockianUltraCricket()
+        val player = Mice("Wowbagger", 3)
+        val target = Human("Arthur Dent")
 
-        game.bat(target)
+        assertTrue(game.addPlayer(player))
 
-        assertEquals(1, target.hitCount)
+        game.bat(player, target)
+
+        assertEquals(4, player.score)
     }
 
     @Test
     fun brockianUltraCricketCanHitWithoutVisibleReason() {
-        val game = BrockianUltraCricket(BinomialQueue())
+        val game = BrockianUltraCricket()
+        val player = Mice("Agrajag", 9)
         val target = RecordingTarget()
 
-        game.hitWithoutVisibleReason(target)
+        game.addPlayer(player)
+        game.hitWithoutVisibleReason(player, target)
 
+        assertEquals(10, player.score)
         assertEquals(1, target.hitCount)
     }
 
     @Test
     fun brockianUltraCricketChoosesOneOfAvailableHumans() {
-        val game = BrockianUltraCricket(BinomialQueue())
+        val game = BrockianUltraCricket()
         val first = Human("Ford Prefect")
         val second = Human("Zaphod Beeblebrox")
 
@@ -135,11 +141,25 @@ class DomainModelTddTest {
     }
 
     @Test
+    fun gameStoresPlayersInternallyThroughAddPlayerAndRemovePlayer() {
+        val game = BrockianUltraCricket()
+        val player = Mice("Marvin", 0)
+
+        assertTrue(game.addPlayer(player))
+        assertTrue(player in game.players)
+        assertTrue(game.removePlayer(player))
+        assertTrue(player !in game.players)
+    }
+
+    @Test
     fun brockianUltraCricketCanPlayARoundForPlayerAndTarget() {
-        val game = BrockianUltraCricket(BinomialQueue())
+        val game = BrockianUltraCricket()
         val player = Mice("Marvin", 0)
         val target = Human("Arthur Dent")
 
+        game.addPlayer(player)
+
         assertDoesNotThrow { game.playRound(player, target) }
+        assertEquals(1, player.score)
     }
 }
