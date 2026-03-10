@@ -9,21 +9,29 @@ abstract class Game<T : Playable>(
     val players: Collection<T>
         get() = playersStore.toList()
 
-    fun addPlayer(player: T): Boolean {
+    open fun addPlayer(player: T): Boolean {
         if (player in playersStore) return false
         return playersStore.add(player)
     }
 
-    fun removePlayer(player: T): Boolean {
+    open fun removePlayer(player: T): Boolean {
         return playersStore.remove(player)
     }
 
     protected fun hasPlayer(player: T): Boolean = player in playersStore
 
-    protected fun requeuePlayer(player: T) {
-        check(removePlayer(player)) { "Player must be registered before score update" }
-        addPlayer(player)
+    protected fun requeuePlayer(
+        player: T,
+        update: (T) -> Unit = {},
+    ) {
+        check(playersStore.remove(player)) { "Player must be registered before score update" }
+        update(player)
+        playersStore.add(player)
     }
+
+    protected fun highestScoringPlayer(): T? = playersStore.maxByOrNull { it.score }
+
+    protected fun snapshotPlayers(): List<T> = playersStore.toList()
 
     abstract fun start()
 

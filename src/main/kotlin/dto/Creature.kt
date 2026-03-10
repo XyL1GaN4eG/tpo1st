@@ -3,7 +3,10 @@ package juko.dto
 abstract class Creature(
     val name: String,
 ) {
+    var isPhysicallyManifested: Boolean = false
+        private set
+
     open fun manifestPhysically() {
-        // no-op stub for domain model tests
+        isPhysicallyManifested = true
     }
 }

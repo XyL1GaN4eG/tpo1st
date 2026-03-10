@@ -6,15 +6,29 @@ open class Mice(
     name: String,
     override var score: Int,
 ) : Creature(name), Playable, Comparable<Mice> {
+    var meaningOfLifeArguments: Int = 0
+        private set
+    var hasResolvedAllQuestions: Boolean = false
+        private set
+    var successfulHits: Int = 0
+        private set
+
     fun argueAboutMeaningOfLife() {
-        // no-op stub for domain model tests
+        manifestPhysically()
+        meaningOfLifeArguments++
+        hasResolvedAllQuestions = false
     }
 
     fun resolveAllQuestionsOnceAndForAll() {
-        // no-op stub for domain model tests
+        manifestPhysically()
+        meaningOfLifeArguments = 0
+        hasResolvedAllQuestions = true
     }
 
     fun playBrockianUltraCricket(target: Hittable) {
+        manifestPhysically()
+        successfulHits++
+        awardPoint()
         target.receiveUnexpectedHit()
     }
 

@@ -3,11 +3,18 @@ package juko.dto
 import juko.game.Hittable
 
 class Human(name: String) : Creature(name), Hittable {
+    var unexpectedHitCount: Int = 0
+        private set
+    var isRunningAway: Boolean = false
+        private set
+
     override fun receiveUnexpectedHit() {
-        // no-op stub for domain model tests
+        manifestPhysically()
+        unexpectedHitCount++
+        isRunningAway = false
     }
 
     fun runAwayFromDanger() {
-        // no-op stub for domain model tests
+        isRunningAway = true
     }
 }
