@@ -1,13 +1,8 @@
 package juko
 
-import kotlin.math.atan
+import juko.mymath.Arctg
 
 fun main() {
-    val math = MyMath()
+    val math = Arctg()
     for (i in 0..10) println(math.myArctg(i / 10.toDouble()))
-}
-
-class MyMath() {
-    fun myArctg(number: Double) =
-        atan(number)
 }
