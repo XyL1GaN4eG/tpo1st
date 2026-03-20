@@ -104,212 +104,213 @@ ADD_START → UNION_START → UNION_MERGE_ROOT_LISTS → UNION_LINK_CURRENT_UNDE
 
 ### Диаграмма классов
 
-```plantuml
-@startuml
-
-!theme plain
-left to right direction
-skinparam linetype ortho
-
-interface BattingGame<P, T> << interface >> {
-  + bat(P, T): Unit
+```mermaid
+direction LR
+class BattingGame~P, T~ {
+<<Interface>>
+  + bat(P, T) Unit
 }
-class BinomialNode<T> {
-  + BinomialNode(T, Int, BinomialNode<T>?, BinomialNode<T>?, BinomialNode<T>?): 
-   parent: BinomialNode<T>?
-   sibling: BinomialNode<T>?
-   degree: Int
-   key: T
-   child: BinomialNode<T>?
+class BinomialNode~T~ {
+  + BinomialNode(T, Int, BinomialNode~T~?, BinomialNode~T~?, BinomialNode~T~?) 
+   BinomialNode~T~? parent
+   BinomialNode~T~? sibling
+   Int degree
+   T key
+   BinomialNode~T~? child
 }
-class BinomialQueue<T> {
-  + BinomialQueue(): 
-  + contains(T): Boolean
-  + addAll(Collection<T>): Boolean
-  + extractMin(): T?
-  + iterator(): Iterator<T>
-  + retainAll(Collection<T>): Boolean
-  - trace(TracePoint): Unit
-  + remove(T): Boolean
-  + clear(): Unit
-  - mergeRootLists(BinomialNode<T>?): BinomialNode<T>?
-  + add(T): Boolean
-  + union(BinomialQueue<T>): Unit
-  + removeAll(Collection<T>): Boolean
-  + containsAll(Collection<T>): Boolean
-  - binomialTreeSize(Int): Int
-  - rebuildKeeping((T) -> Boolean): Boolean
-  - linkTrees(BinomialNode<T>, BinomialNode<T>): Unit
-  + clearTrace(): Unit
-  + traceTo(Collection<TracePoint>): BinomialQueue<T>
-  + min(): T?
-   empty: Boolean
-   size: Int
+class BinomialQueue~T~ {
+  + BinomialQueue() 
+  + contains(T) Boolean
+  + addAll(Collection~T~) Boolean
+  + extractMin() T?
+  + iterator() Iterator~T~
+  + retainAll(Collection~T~) Boolean
+  - trace(TracePoint) Unit
+  + remove(T) Boolean
+  + clear() Unit
+  - mergeRootLists(BinomialNode~T~?) BinomialNode~T~?
+  + add(T) Boolean
+  + union(BinomialQueue~T~) Unit
+  + removeAll(Collection~T~) Boolean
+  + containsAll(Collection~T~) Boolean
+  - binomialTreeSize(Int) Int
+  - rebuildKeeping((T) -~ Boolean) Boolean
+  - linkTrees(BinomialNode~T~, BinomialNode~T~) Unit
+  + clearTrace() Unit
+  + traceTo(Collection~TracePoint~) BinomialQueue~T~
+  + min() T?
+   Boolean empty
+   Int size
 }
-interface Brockian<P> << interface >> {
-  + hitWithoutVisibleReason(P, Hittable): Unit
+class Brockian~P~ {
+<<Interface>>
+  + hitWithoutVisibleReason(P, Hittable) Unit
 }
 class BrockianUltraCricket {
-  + BrockianUltraCricket(): 
-  + chooseTarget(Collection<Human>): Human
-  + hitWithoutVisibleReason(Mice, Hittable): Unit
-  + result(): Unit
-  - performHit(Mice, Hittable): Unit
-  + addPlayer(Mice): Boolean
-  + start(): Unit
-  + playRound(Mice, Human): Unit
-  + runAway(): Unit
-  - recordRound(Mice, Human): Unit
-  + bat(Mice, Human): Unit
-  + resultByPlayer(Mice): Unit
-  - requireActiveGame(): Unit
-  + removePlayer(Mice): Boolean
-  + finish(): Unit
-   finished: Boolean
-   started: Boolean
-   roundsPlayed: Int
-   lastResult: MatchResult?
-   lastPlayerResult: PlayerResult?
+  + BrockianUltraCricket() 
+  + chooseTarget(Collection~Human~) Human
+  + hitWithoutVisibleReason(Mice, Hittable) Unit
+  + result() Unit
+  - performHit(Mice, Hittable) Unit
+  + addPlayer(Mice) Boolean
+  + start() Unit
+  + playRound(Mice, Human) Unit
+  + runAway() Unit
+  - recordRound(Mice, Human) Unit
+  + bat(Mice, Human) Unit
+  + resultByPlayer(Mice) Unit
+  - requireActiveGame() Unit
+  + removePlayer(Mice) Boolean
+  + finish() Unit
+   Boolean finished
+   Boolean started
+   Int roundsPlayed
+   MatchResult? lastResult
+   PlayerResult? lastPlayerResult
 }
 class Creature {
-  + Creature(String): 
-  + manifestPhysically(): Unit
-   name: String
-   physicallyManifested: Boolean
+  + Creature(String) 
+  + manifestPhysically() Unit
+   String name
+   Boolean physicallyManifested
 }
-class Cricket<P, T> {
-  + Cricket(() -> Collection<P>): 
-  + chooseTarget(Collection<T>): T
+class Cricket~P, T~ {
+  + Cricket(() -~ Collection~P~) 
+  + chooseTarget(Collection~T~) T
 }
-class Game<T> {
-  + Game(() -> Collection<T>): 
-  # hasPlayer(T): Boolean
-  + finish(): Unit
-  + addPlayer(T): Boolean
-  # snapshotPlayers(): List<T>
-  + resultByPlayer(T): Unit
-  + result(): Unit
-  + removePlayer(T): Boolean
-  # requeuePlayer(T, (T) -> Unit): Unit
-  # highestScoringPlayer(): T?
-  + start(): Unit
-   players: Collection<T>
+class Game~T~ {
+  + Game(() -~ Collection~T~) 
+  # hasPlayer(T) Boolean
+  + finish() Unit
+  + addPlayer(T) Boolean
+  # snapshotPlayers() List~T~
+  + resultByPlayer(T) Unit
+  + result() Unit
+  + removePlayer(T) Boolean
+  # requeuePlayer(T, (T) -~ Unit) Unit
+  # highestScoringPlayer() T?
+  + start() Unit
+   Collection~T~ players
 }
-interface Hittable << interface >> {
-  + receiveUnexpectedHit(): Unit
+class Hittable {
+<<Interface>>
+  + receiveUnexpectedHit() Unit
 }
 class Human {
-  + Human(String): 
-  + receiveUnexpectedHit(): Unit
-  + runAwayFromDanger(): Unit
-   unexpectedHitCount: Int
-   runningAway: Boolean
+  + Human(String) 
+  + receiveUnexpectedHit() Unit
+  + runAwayFromDanger() Unit
+   Int unexpectedHitCount
+   Boolean runningAway
 }
 class Iterator {
-  + Iterator(): 
-  + remove(): Unit
-  + hasNext(): Boolean
-  + next(): T
+  + Iterator() 
+  + remove() Unit
+  + hasNext() Boolean
+  + next() T
 }
 class MainKt {
-  + main(): Unit
+  + main() Unit
 }
 class Mice {
-  + Mice(String, Int): 
-  + playBrockianUltraCricket(Hittable): Unit
-  + compareTo(Mice): Int
-  + awardPoint(Int): Unit
-  + argueAboutMeaningOfLife(): Unit
-  + resolveAllQuestionsOnceAndForAll(): Unit
-   hasResolvedAllQuestions: Boolean
-   meaningOfLifeArguments: Int
-   score: Int
-   successfulHits: Int
+  + Mice(String, Int) 
+  + playBrockianUltraCricket(Hittable) Unit
+  + compareTo(Mice) Int
+  + awardPoint(Int) Unit
+  + argueAboutMeaningOfLife() Unit
+  + resolveAllQuestionsOnceAndForAll() Unit
+   Boolean hasResolvedAllQuestions
+   Int meaningOfLifeArguments
+   Int score
+   Int successfulHits
 }
 class MicePlayer {
-  + MicePlayer(String, Int): 
-  + enterMatch(): Unit
-  + leaveMatch(): Unit
-   enteredMatches: Int
-   inMatch: Boolean
+  + MicePlayer(String, Int) 
+  + enterMatch() Unit
+  + leaveMatch() Unit
+   Int enteredMatches
+   Boolean inMatch
 }
-interface Playable << interface >> {
-   score: Int
+class Playable {
+<<Interface>>
+   Int score
 }
-enum TracePoint << enumeration >> {
-  - TracePoint(): 
-  + values(): TracePoint[]
-  + valueOf(String): TracePoint
-   entries: EnumEntries<TracePoint>
+class TracePoint {
+<<enumeration>>
+  - TracePoint() 
+  + values() TracePoint[]
+  + valueOf(String) TracePoint
+   EnumEntries~TracePoint~ entries
 }
-interface UltraGame << interface >> {
-  + runAway(): Unit
+class UltraGame {
+<<Interface>>
+  + runAway() Unit
 }
-entity data  MatchResult << data >> {
-  + MatchResult(Mice?, Int, Int, Boolean): 
-   leader: Mice?
-   finished: Boolean
-   roundsPlayed: Int
-   escapedTargets: Int
+class data  MatchResult {
+  + MatchResult(Mice?, Int, Int, Boolean) 
+   Mice? leader
+   Boolean finished
+   Int roundsPlayed
+   Int escapedTargets
 }
-entity data  PlayerResult << data >> {
-  + PlayerResult(Mice, Int, Int, Boolean): 
-   leader: Boolean
-   player: Mice
-   score: Int
-   successfulHits: Int
+class data  PlayerResult {
+  + PlayerResult(Mice, Int, Int, Boolean) 
+   Boolean leader
+   Mice player
+   Int score
+   Int successfulHits
 }
-entity data  Round << data >> {
-  + Round(Mice, Human, Int): 
-   player: Mice
-   target: Human
-   scoreAfterHit: Int
+class data  Round {
+  + Round(Mice, Human, Int) 
+   Mice player
+   Human target
+   Int scoreAfterHit
 }
 
-BattingGame           -[#595959,dashed]->  Hittable             
-BattingGame           -[#595959,dashed]->  Playable             
-BinomialNode          +-[#820000,plain]-  BinomialQueue        
-BinomialQueue         -[#595959,dashed]->  BinomialNode         : "«create»"
-BinomialQueue        "1" *-[#595959,plain]-> "head\n1" BinomialNode         
-BinomialQueue         -[#595959,dashed]->  Iterator             : "«create»"
-Brockian              -[#595959,dashed]->  Playable             
-BrockianUltraCricket  -[#595959,dashed]->  BinomialQueue        : "«create»"
-BrockianUltraCricket  -[#008200,dashed]-^  Brockian             
-BrockianUltraCricket  -[#000082,plain]-^  Cricket              
-BrockianUltraCricket  -[#595959,dashed]->  Cricket              : "«create»"
-BrockianUltraCricket "1" *-[#595959,plain]-> "escapedTargets\n*" Human                
-BrockianUltraCricket  -[#008200,dashed]-^  UltraGame            
-BrockianUltraCricket  -[#595959,dashed]->  data  MatchResult    : "«create»"
-BrockianUltraCricket "1" *-[#595959,plain]-> "computedResult\n1" data  MatchResult    
-BrockianUltraCricket "1" *-[#595959,plain]-> "computedPlayerResult\n1" data  PlayerResult   
-BrockianUltraCricket  -[#595959,dashed]->  data  PlayerResult   : "«create»"
-BrockianUltraCricket  -[#595959,dashed]->  data  Round          : "«create»"
-BrockianUltraCricket "1" *-[#595959,plain]-> "rounds\n*" data  Round          
-Cricket               -[#008200,dashed]-^  BattingGame          
-Cricket               -[#000082,plain]-^  Game                 
-Cricket               -[#595959,dashed]->  Game                 : "«create»"
-Cricket               -[#595959,dashed]->  Hittable             
-Cricket               -[#595959,dashed]->  Playable             
-Game                  -[#595959,dashed]->  Playable             
-Human                 -[#000082,plain]-^  Creature             
-Human                 -[#595959,dashed]->  Creature             : "«create»"
-Human                 -[#008200,dashed]-^  Hittable             
-Iterator              +-[#820000,plain]-  BinomialQueue        
-Mice                  -[#000082,plain]-^  Creature             
-Mice                  -[#595959,dashed]->  Creature             : "«create»"
-Mice                  -[#008200,dashed]-^  Playable             
-MicePlayer            -[#000082,plain]-^  Mice                 
-MicePlayer            -[#595959,dashed]->  Mice                 : "«create»"
-MicePlayer            -[#008200,dashed]-^  Playable             
-TracePoint            +-[#820000,plain]-  BinomialQueue        
-data  MatchResult     +-[#820000,plain]-  BrockianUltraCricket 
-data  MatchResult    "1" *-[#595959,plain]-> "leader\n1" Mice                 
-data  PlayerResult    +-[#820000,plain]-  BrockianUltraCricket 
-data  PlayerResult   "1" *-[#595959,plain]-> "player\n1" Mice                 
-data  Round           +-[#820000,plain]-  BrockianUltraCricket 
-data  Round          "1" *-[#595959,plain]-> "target\n1" Human                
-data  Round          "1" *-[#595959,plain]-> "player\n1" Mice                 
-@enduml
+BattingGame~P, T~  ..>  Hittable 
+BattingGame~P, T~  ..>  Playable 
+BinomialQueue~T~  -->  BinomialNode~T~ 
+BinomialQueue~T~  ..>  BinomialNode~T~ : «create»
+BinomialQueue~T~ "1" *--> "head 1" BinomialNode~T~ 
+BinomialQueue~T~  ..>  Iterator : «create»
+Brockian~P~  ..>  Playable 
+BrockianUltraCricket  ..>  BinomialQueue~T~ : «create»
+BrockianUltraCricket  ..>  Brockian~P~ 
+BrockianUltraCricket  -->  Cricket~P, T~ 
+BrockianUltraCricket  ..>  Cricket~P, T~ : «create»
+BrockianUltraCricket "1" *--> "escapedTargets *" Human 
+BrockianUltraCricket  ..>  UltraGame 
+BrockianUltraCricket  ..>  data  MatchResult : «create»
+BrockianUltraCricket "1" *--> "computedResult 1" data  MatchResult 
+BrockianUltraCricket "1" *--> "computedPlayerResult 1" data  PlayerResult 
+BrockianUltraCricket  ..>  data  PlayerResult : «create»
+BrockianUltraCricket  ..>  data  Round : «create»
+BrockianUltraCricket "1" *--> "rounds *" data  Round 
+Cricket~P, T~  ..>  BattingGame~P, T~ 
+Cricket~P, T~  -->  Game~T~ 
+Cricket~P, T~  ..>  Game~T~ : «create»
+Cricket~P, T~  ..>  Hittable 
+Cricket~P, T~  ..>  Playable 
+Game~T~  ..>  Playable 
+Human  -->  Creature 
+Human  ..>  Creature : «create»
+Human  ..>  Hittable 
+BinomialQueue~T~  -->  Iterator 
+Mice  -->  Creature 
+Mice  ..>  Creature : «create»
+Mice  ..>  Playable 
+MicePlayer  -->  Mice 
+MicePlayer  ..>  Mice : «create»
+MicePlayer  ..>  Playable 
+BinomialQueue~T~  -->  TracePoint 
+BrockianUltraCricket  -->  data  MatchResult 
+data  MatchResult "1" *--> "leader 1" Mice 
+BrockianUltraCricket  -->  data  PlayerResult 
+data  PlayerResult "1" *--> "player 1" Mice 
+BrockianUltraCricket  -->  data  Round 
+data  Round "1" *--> "target 1" Human 
+data  Round "1" *--> "player 1" Mice 
+
 ```
 
 ### Интерфейсы
